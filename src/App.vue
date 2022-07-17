@@ -1,5 +1,6 @@
 <template>
     <div class="wrapper">
+        
         <h1>Страница с постами</h1>
         <div class="app__btns">
             <Button @click="showDialog">Создать пост</Button>
