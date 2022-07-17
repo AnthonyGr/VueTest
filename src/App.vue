@@ -1,44 +1,93 @@
 <template>
     <div class="wrapper">
-        <PostForm @create="createPost"/>
-        <PostList :posts="posts" @remove="removePost"/>
+        <h1>Страница с постами</h1>
+        <div class="app__btns">
+            <Button @click="showDialog">Создать пост</Button>
+            <MySelect
+              v-model="selectedSort"
+              :options="sortOptions"
+            />
+        </div>
+        <MyDialog v-model:show="dialogVisible">
+            <PostForm @create="createPost"/>
+        </MyDialog>
+        <p v-if="isPostLoading === true">Идет загрузка...</p>
+        <PostList v-if="isPostLoading === false" :posts="sortedPosts" @remove="removePost"/>
+    
     </div>
 </template>
 
 <script>
 import PostForm from "./components/PostForm";
 import PostList from "./components/PostList";
+import MyDialog from "@/components/UI/MyDialog";
+import Button from "@/components/UI/Button";
+import MySelect from "@/components/UI/MySelect";
 
 export default {
-    components: {PostForm, PostList},
+    components: {MySelect, Button, MyDialog, PostForm, PostList},
     data() {
         return {
-            posts: [
-                {id: 1, title: "JavaScript", body: "Описание 1"},
-                {id: 2, title: "JavaScript", body: "Описание 2"},
-                {id: 3, title: "Vue", body: "Описание 3"},
-            ],
-        };
+            posts: [],
+            dialogVisible: false,
+            isPostLoading: true,
+            selectedSort: '',
+            sortOptions: [
+                {value: 'title', name: 'По названию'},
+                {value: 'body', name: 'По содержимому'},
+            ]
+        }
     },
     methods: {
         createPost(post) {
             this.posts.push(post);
+            this.dialogVisible = false;
         },
         removePost(post) {
             this.posts = this.posts.filter(p => p.id !== post.id);
-        }
+        },
+        showDialog() {
+            this.dialogVisible = true
+        },
+        async fetchPosts() {
+            try {
+                this.isPostLoading = true
+                const res = await fetch('https://jsonplaceholder.typicode.com/posts?_limit=5');
+                this.posts = await res.json();
+            } catch (e) {
+                alert('Ошибка')
+            } finally {
+                this.isPostLoading = false
+            }
+        },
     },
+    mounted() {
+        this.fetchPosts()
+    },
+    computed: {
+      sortedPosts() {
+          return [...this.posts].sort((post1, post2) => post1[this.selectedSort]?.localeCompare(post2[this.selectedSort]))
+      }
+    },
+    // watch:  {
+    //     selectedSort(newValue) {
+    //         this.posts.sort((post1, post2) => {
+    //             return post1[this.selectedSort]?.localeCompare(post2[newValue])
+    //         })
+    //     }
+    // }
 };
 </script>
 
 <style lang="sass" scoped>
-*
-    margin: 0
-    padding: 0
-    box-sizing: border-box
+
 
 .wrapper
     max-width: 800px
     padding: 30px 20px
     margin: 0 auto
+
+.app__btns
+    display: flex
+    justify-content: space-between
 </style>
