@@ -1,30 +1,44 @@
 <template>
-  <nav>
-    <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link>
-  </nav>
-  <router-view/>
+    <div class="wrapper">
+        <PostForm @create="createPost"/>
+        <PostList :posts="posts" @remove="removePost"/>
+    </div>
 </template>
 
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
+<script>
+import PostForm from "./components/PostForm";
+import PostList from "./components/PostList";
 
-nav {
-  padding: 30px;
-}
+export default {
+    components: {PostForm, PostList},
+    data() {
+        return {
+            posts: [
+                {id: 1, title: "JavaScript", body: "Описание 1"},
+                {id: 2, title: "JavaScript", body: "Описание 2"},
+                {id: 3, title: "Vue", body: "Описание 3"},
+            ],
+        };
+    },
+    methods: {
+        createPost(post) {
+            this.posts.push(post);
+        },
+        removePost(post) {
+            this.posts = this.posts.filter(p => p.id !== post.id);
+        }
+    },
+};
+</script>
 
-nav a {
-  font-weight: bold;
-  color: #2c3e50;
-}
+<style lang="sass" scoped>
+*
+    margin: 0
+    padding: 0
+    box-sizing: border-box
 
-nav a.router-link-exact-active {
-  color: #42b983;
-}
+.wrapper
+    max-width: 800px
+    padding: 30px 20px
+    margin: 0 auto
 </style>
